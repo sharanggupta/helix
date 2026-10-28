@@ -127,22 +127,25 @@ public class TestRoutingTableProviderMonitor {
     monitor.unregister();
   }
 
+  @Test
   public void testCurrentStateMetrics() throws JMException, InterruptedException {
     PropertyType type = PropertyType.CURRENTSTATES;
     RoutingTableProviderMonitor monitor = new RoutingTableProviderMonitor(type, TEST_CLUSTER);
-    monitor.register();
-    ObjectName name = buildObjectName(type, TEST_CLUSTER);
+    try {
+      monitor.register();
+      ObjectName name = buildObjectName(type, TEST_CLUSTER);
 
-    monitor.increaseCallbackCounters(10);
-    Assert.assertEquals((long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max"), 0);
+      monitor.increaseCallbackCounters(10);
+      Assert.assertEquals((long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max"), 0);
 
-    monitor.recordStatePropagationLatency(5);
-    long statelatency = (long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max");
-    Assert.assertEquals(statelatency, 5);
-    monitor.recordStatePropagationLatency(10);
-    statelatency = (long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max");
-    Assert.assertEquals(statelatency, 10);
-
-    monitor.unregister();
+      monitor.recordStatePropagationLatency(5);
+      long statelatency = (long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max");
+      Assert.assertEquals(statelatency, 5);
+      monitor.recordStatePropagationLatency(10);
+      statelatency = (long) _beanServer.getAttribute(name, "StatePropagationLatencyGauge.Max");
+      Assert.assertEquals(statelatency, 10);
+    } finally {
+      monitor.unregister();
+    }
   }
 }
